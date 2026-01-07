@@ -1,0 +1,15 @@
+Search TRIPS
+@startuml
+    Adondevamos.web -> Adondevamos.web : Generate_TripsSearchFilters
+    Adondevamos.web -> Adondevamos.back : POST /Trips/Search
+    Adondevamos.back -> Adondevamos.back : GENERATE_QUERY_FILTER
+    Adondevamos.back -> Adondevamos.db: GET_TripListByFilters
+    Adondevamos.db -> Adondevamos.back: 
+    note over Adondevamos.back: TripListByFiltersRs
+    Adondevamos.back -> Adondevamos.db: GET_TripOwnerListByIDs
+    Adondevamos.db -> Adondevamos.back: 
+    note over Adondevamos.back: TripOwnerListRs
+    Adondevamos.back -> Adondevamos.back : GENERATE_NewTripRs
+    Adondevamos.back -> Adondevamos.web : statuscode 200
+    note over Adondevamos.web: NewTripRs
+@enduml

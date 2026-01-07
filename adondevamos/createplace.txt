@@ -1,0 +1,29 @@
+@startuml
+    Adondevamos.web -> Adondevamos.back : POST: /Places
+    note over Adondevamos.web: CreatePlaceRq
+    Adondevamos.back -> Adondevamos.db : INSERT_PLACE
+    Adondevamos.db -> Adondevamos.back : GET_CREATED_PLACE
+    note over Adondevamos.db: LastCreatedPlace
+
+    group LastCreatedPlace_IS_VALID
+        Adondevamos.back -> Adondevamos.web : statuscode 201 
+        note over Adondevamos.web : CreatePlaceRs201
+        group /Places_Response_201
+            Adondevamos.web -> Adondevamos.web : CreateFacilityListRq 
+            Adondevamos.web -> Adondevamos.back : /POST /Places/{CreatePlaceRs200.LastCreatedPlace.id}/Facilities
+            note over Adondevamos.web : CreateFacilityListRq
+            Adondevamos.back -> Adondevamos.db : INSERT_FACILITY_LIST
+            Adondevamos.db -> Adondevamos.back : GET_INSERTED_DATA
+            Adondevamos.back -> Adondevamos.web : statuscode 201
+            note over Adondevamos.web : CreateFacilityList201
+        else
+            Adondevamos.back -> Adondevamos.web: statuscode 500
+            note over Adondevamos.web: CreateFacilityListRs500
+        end
+    else CreatedPlace_failed
+        Adondevamos.back -> Adondevamos.web: statuscode 500
+        note over Adondevamos.web: CreatePlaceRs500
+        Adondevamos.web -> Adondevamos.web : SHOW_ERROR
+    end
+
+@enduml

@@ -1,0 +1,16 @@
+SEARCH PLACES
+@startuml
+    Adondevamos.web -> Adondevamos.web : Generate_PlaceSearchFilters
+    Adondevamos.web -> Adondevamos.back : POST /Places/Search
+    note over Adondevamos.web: PlaceSearchRq
+    Adondevamos.back -> Adondevamos.back : GENERATE_QUERY_FILTER
+    Adondevamos.back -> Adondevamos.db: GET_PlaceListByFilters
+    Adondevamos.db -> Adondevamos.back: 
+    note over Adondevamos.back: PlaceListByFiltersRs
+    Adondevamos.back -> Adondevamos.db: GET_UbicationPlaceListById
+    Adondevamos.db -> Adondevamos.back: 
+    note over Adondevamos.back: UbicationPlaceListRs
+    Adondevamos.back -> Adondevamos.back : GENERATE_PlaceSearchRs
+    Adondevamos.back -> Adondevamos.web : statuscode 200
+    note over Adondevamos.web: PlaceSearchRs
+@enduml

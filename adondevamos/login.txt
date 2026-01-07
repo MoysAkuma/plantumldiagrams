@@ -1,0 +1,22 @@
+@startuml
+Adondevamos.web -> Adondevamos.back : Post: /Login
+note over Adondevamos.web: LoginRq
+group id_is_Email
+    Adondevamos.back -> Adondevamos.db: validate_by_emailAndPassword
+else id_is_Tag
+    Adondevamos.back -> Adondevamos.db: validate_by_tagAndPassword
+end
+
+group validate_credentials_are_valid
+    Adondevamos.db -> Adondevamos.back :response 200
+    Adondevamos.back -> Adondevamos.db: get_role_info
+    Adondevamos.back -> Adondevamos.redis: save_session
+    Adondevamos.redis -> Adondevamos.back : 
+    
+    Adondevamos.back -> Adondevamos.back: create LoginRs
+    Adondevamos.back-> Adondevamos.web : response 200
+    note over Adondevamos.back: LoginRs
+else !validate_credentials_are_valid
+    Adondevamos.back -> Adondevamos.web: response 409
+end
+@enduml

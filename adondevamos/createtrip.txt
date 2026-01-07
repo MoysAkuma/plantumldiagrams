@@ -1,0 +1,41 @@
+CREATE TRIP
+@startuml
+    Adondevamos.web -> Adondevamos.back : POST: /Trips
+    note over Adondevamos.web: CreateTripRq
+    Adondevamos.back -> Adondevamos.db : INSERT_TRIP
+    Adondevamos.db -> Adondevamos.back : GET_CREATED_TRIP
+    note over Adondevamos.db: LastCreatedTrip
+
+    group LastCreatedTrip_IS_VALID
+        Adondevamos.back -> Adondevamos.web : statuscode 201 
+        note over Adondevamos.web : CreateTripRs200
+        group /Trips_Response_201
+            Adondevamos.web -> Adondevamos.web : CreateMemberListRq 
+            Adondevamos.web -> Adondevamos.back : /POST /Trips/{CreateTripRs200.LastCreatedTrip.id}/Members
+            note over Adondevamos.web : CreateMemberListRq
+            Adondevamos.back -> Adondevamos.db : INSERT_MEMBER_LIST
+            Adondevamos.db -> Adondevamos.back : GET_INSERTED_DATA
+            Adondevamos.back -> Adondevamos.web : statuscode 201
+            note over Adondevamos.web : CreateMemberListRs201
+            group /Trips/{TRIPID}/Member_Response_200
+                Adondevamos.web -> Adondevamos.web : CreateItineraryRq 
+                Adondevamos.web -> Adondevamos.back : /POST /Trips/{CreateTripRs200.LastCreatedTrip.id}/Itinerary
+                Adondevamos.back -> Adondevamos.db : INSERT_ITINERARY
+                Adondevamos.db -> Adondevamos.back : GET_INSERTED_ITINERARY
+                Adondevamos.back -> Adondevamos.web : statuscode 201
+                Adondevamos.web -> Adondevamos.web : SHOW_SUCCESS_MESSAGE
+            else 
+                Adondevamos.back -> Adondevamos.web : statuscode 500
+                Adondevamos.web -> Adondevamos.web : SHOW ERROR
+            end
+        else
+            Adondevamos.back -> Adondevamos.web: statuscode 500
+            note over Adondevamos.web: CreateMemberListRs500
+        end
+    else CreatedTrip_failed
+        Adondevamos.back -> Adondevamos.web: statuscode 500
+        note over Adondevamos.web: CreateTripRs500
+        Adondevamos.web -> Adondevamos.web : SHOW_ERROR
+    end
+
+@enduml

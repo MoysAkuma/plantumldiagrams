@@ -1,0 +1,16 @@
+@startuml
+Adondevamos.web -> Adondevamos.back : Post: /Check-Auth
+note over Adondevamos.web: CheckAuthRq
+group session_exist
+    Adondevamos.back -> Adondevamos.redis : validate_session
+    Adondevamos.redis -> Adondevamos.back
+    Adondevamos.back -> Adondevamos.db : validate_userid
+    Adondevamos.db -> Adondevamos.back
+    Adondevamos.back -> Adondevamos.web: statuscode 200
+    note over Adondevamos.back : CheckAuthRs200
+else 
+    Adondevamos.back -> Adondevamos.web: statuscode 401 
+    note over Adondevamos.back: CheckAuthRs401
+end
+
+@enduml
