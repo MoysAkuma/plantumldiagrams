@@ -1,12 +1,13 @@
 @startuml
 
-
 package "Usuarios" <<Database>> {
     entity "Usuario" as usuario {
         * id : Uuid <<PK>>
         --
         * nombre : VARCHAR(100)
-        * apellido : VARCHAR(100)
+        * segundoNombre : VARCHAR(100)
+        * apellidoPaterno : VARCHAR(100)
+        * apellidoMaterno : VARCHAR(100)
         * acercaDeMi : VARCHAR(500)
         * correo : VARCHAR(100)
         * contraseña : VARCHAR(100)
@@ -16,7 +17,6 @@ package "Usuarios" <<Database>> {
         * sexo : VARCHAR(1)
         * profilePhotoUrl : VARCHAR(200)
     }
-
 }
 package "Proveedores" <<Database>> {
     entity "Proveedor" as proveedor {
@@ -24,6 +24,9 @@ package "Proveedores" <<Database>> {
         --
         * userId : Uuid <<FK>>
         * categoria : INT <<FK>>
+        * ciudad : INT <<FK>>
+        * estado : INT <<FK>>
+        * pais : INT <<FK>>
         ..
         * nombreLegal : VARCHAR(100)
         * nombreComercial : VARCHAR(100)
@@ -31,9 +34,19 @@ package "Proveedores" <<Database>> {
         * descripcion : VARCHAR(500)
         * rating : VARCHAR(4)
         * direccion : VARCHAR(200)
-        * ciudad : INT
-        * estado : INT
-        * pais : INT
+        * codigoPostal : VARCHAR(10)
+        * telefono : VARCHAR(20)
+        * telefonoWhatsapp : VARCHAR(20)
+    }
+    
+    entity "IdiomasProveedores" as idiomasProveedores {
+        * id : Int <<PK>>
+        --
+        * proveedorId : Uuid <<FK>>
+        * idiomaId : Int <<FK>>
+        ..
+        * nivel : VARCHAR(20)
+        * certificadoUrl : VARCHAR(200)
     }
 
     entity "Sucursal" as sucursal {
@@ -67,11 +80,50 @@ package "Proveedores" <<Database>> {
         * id : Uuid <<PK>>
         --
         * proveedorId : Uuid <<FK>>
+        * categoriaId : Int <<FK>>
         ..
         * name : VARCHAR(100)
         * duration : INT
         * descripcion : VARCHAR(500)
         * precio : FLOAT
+        * precioMaximo? : FLOAT
+        * rating? : VARCHAR(4)
+        * esDestacado? : BOOLEAN
+        * orden? : INT
+    }
+
+    entity "SucursalesServicios" as sucursalesServicios {
+        * id : Int <<PK>>
+        --
+        * sucursalId : Uuid <<FK>>
+        * servicioId : Uuid <<FK>>
+        * precio? : FLOAT
+    }
+
+    entity "EmpleadosServicios" as empleadosServicios {
+        * id : Int <<PK>>
+        --
+        * empleadoId : Uuid <<FK>>
+        * servicioId : Uuid <<FK>>
+    }
+
+    entity "EmpleadosIdiomas" as empleadosIdiomas {
+        * id : Int <<PK>>
+        --
+        * empleadoId : Uuid <<FK>>
+        * idiomaId : Int <<FK>>
+        ..
+        * nivel : VARCHAR(20)
+        * certificadoUrl : VARCHAR(200)
+    }
+
+    entity "AvisosServicios" as avisosServicios {
+        * id : Int <<PK>>
+        --
+        * proveedorId : Uuid <<FK>>
+        * servicioId : Uuid <<FK>>
+        ..
+        * text : VARCHAR(100)
     }
 
     entity "CategoriasProveedores" as categoriaproveedores {
@@ -87,30 +139,73 @@ package "Proveedores" <<Database>> {
         * id : Int <<PK>>
         --
         * nombre : VARCHAR(100)
-        * descripcion : VARCHAR(500)
+        * descripcion : VARCHAR(100)
         * iconUrl : VARCHAR(200)
     }
 
     entity "Horario" as horario {
-        * id : Uuid <<PK>>
+        * id : int <<PK>>
         --
         * proveedorId : Uuid <<FK>>
+        * diaSemana : Int <<FK>>
         ..
-        * diaSemana : Int
-        * horaApertura : VARCHAR(20)
-        * horaCierre : VARCHAR(20)
-        * horaInicio : VARCHAR(20)
+        * horaApertura : VARCHAR(5)
+        * horaCierre : VARCHAR(5)
+        * status : BOOLEAN
+        * disponibilidad : VARCHAR(20)
     }
 
     entity "Documentacion" as documentacion{
         * id : Uuid <<PK>>
         --
         * proveedorId : Uuid <<FK>>
-        * category : Int <<FK>>
+        * categoriaId : Int <<FK>>
         ..
-        * tipo : VARCHAR(100)
+        * url : VARCHAR(200)
+        * nombre : VARCHAR(100)
     }
 
+    entity "SolicitudesOnboarding" as solicitudesOnboarding {
+        * id : Uuid <<PK>>
+        --
+        * creadorId : Uuid <<FK>>
+        * representanteLegalId : Uuid <<FK>>
+        * categoria : INT <<FK>>
+        ..
+        * nombreLegal : VARCHAR(100)
+        * nombreComercial : VARCHAR(100)
+        * direccionLegal : VARCHAR(200)
+        * telefonoLegal : VARCHAR(20)
+        * rfc : VARCHAR(13)
+        * descripcion : VARCHAR(500)
+        * ciudad : INT
+        * estado : INT
+        * pais : INT
+        * codigoPostal : VARCHAR(10)
+        * telefono : VARCHAR(20)
+        * telefonoWhatsapp : VARCHAR(20)
+        * horaApertura : VARCHAR(5)
+        * horaCierre : VARCHAR(5)
+        * agregoDocumentacion : BOOLEAN
+    }
+
+    entity "DocumentacionSolicitudes" as documentacionSolicitudes {
+        * id : Int <<PK>>
+        --
+        * solicitudId : Uuid <<FK>>
+        * category : Int <<FK>>
+        ..
+        * nombre : VARCHAR(100)
+        * url : VARCHAR(255)
+    }
+    entity "AnticipacionesProveedores" as anticipacionesProveedores {
+        * id : Uuid <<PK>>
+        --
+        * proveedorId : Uuid <<FK>>
+        ..
+        * anticipacionHoras : INT
+    }
+     
 }
 
 
@@ -124,24 +219,42 @@ package "Citas" <<Database>> {
         * servicioId : Uuid <<FK>>
         * sucursalId? : Uuid <<FK>>
         ..
+        * nombreSolicitante : VARCHAR(100)
+        * telWhatsappSolicitante : VARCHAR(20)
+        * correoSolicitante : VARCHAR(100)
         * fechaCreacion: DATETIME
         * fechaSolicitada : Date
         * horaSolicitada : Time
         * horaFinalizacionDeseada?: Time 
         * status : Int
         * notas : VARCHAR(500)
+        * calificacion? : INT
     }
 
-
-    entity "StatusCatalogo" as statusCatalogo{
+    entity "FormSolicitud" as formSolicitud {
         * id : Uuid <<PK>>
         --
-        * text : VARCHAR(100)
+        * citaId : Uuid <<FK>>
+        * tipo_dato : INT <<FK>>
+        ..
+        * pregunta : VARCHAR(50)
+    }
+
+    entity "CatTipoDato" as catTipoDato {
+        * id : Int <<PK>>
+        --
+        * nombre : VARCHAR(100)
+    }
+
+    entity "StatusCatalogo" as statusCatalogo{
+        * id : Int <<PK>>
+        --
+        * texto : VARCHAR(100)
         * habilitado : BOOLEAN
     }
 
     entity "Confirmaciones" as confirmaciones{
-        * id : INT <<PK>>
+        * id : Int <<PK>>
         --
         * citaId : Uuid <<FK>>
         * usuarioId : Uuid <<FK>>
@@ -149,7 +262,54 @@ package "Citas" <<Database>> {
         * servicioId : Uuid <<FK>>
         ..
         * telefonoWhatsapp: VARCHAR(10)
-    } 
+        * correo : VARCHAR(100)
+        * confirmoProveedor : BOOLEAN
+        * confirmoSolicitante : BOOLEAN
+        * mandoNotificacionProveedor : BOOLEAN
+        * mandoNotificacionSolicitante : BOOLEAN
+    }
+
+    
+
+    entity "Cancelaciones" as cancelaciones {
+        * id : Uuid <<PK>>
+        --
+        * proveedorId : Uuid <<FK>>
+        * solicitanteId : Uuid <<FK>>
+        * userId? : Uuid <<FK>>
+        ..
+        * anticipacionHoras : INT
+        * motivo : VARCHAR(244)
+        * canceloProveedor : BOOLEAN
+        * horaCreacion : DATETIME
+        * mandoNotificacionProveedor : BOOLEAN
+        * mandoNotificacionSolicitante : BOOLEAN
+    }
+
+    entity "Reprogramaciones" as reprogramaciones {
+        * id : Uuid <<PK>>
+        --
+        * proveedorId : Uuid <<FK>>
+        * solicitanteId : Uuid <<FK>>
+        * userId? : Uuid <<FK>>
+        ..
+        * anticipacionHoras : INT
+        * motivo : VARCHAR(244)
+        * horaCreacion : DATETIME
+        * mandoNotificacionProveedor : BOOLEAN
+        * mandoNotificacionSolicitante : BOOLEAN
+    }
+
+    entity "EventosCalendario" as eventosCalendario {
+        * id : Uuid <<PK>>
+        --
+        * proveedorId : Uuid <<FK>>
+        ..
+        * titulo : VARCHAR(100)
+        * descripcion : VARCHAR(500)
+        * fechaInicio : DATETIME
+        * fechaFin : DATETIME
+    }
 }
 
 package "Catalogos" <<Database>> {
@@ -163,6 +323,18 @@ package "Catalogos" <<Database>> {
         --
         * name : VARCHAR(100)
     }
+
+    entity "Idiomas" as idiomas {
+        * id : Int <<PK>>
+        --
+        * nombre : VARCHAR(100)
+    }
+
+    entity "DiasSemana" as diasSemana {
+        * id : Int <<PK>>
+        --
+        * nombre : VARCHAR(20)
+    }
 }
 
 package "Site" <<Database>> {
@@ -171,6 +343,7 @@ package "Site" <<Database>> {
         --
         * message : VARCHAR(500)
     }
+
     entity "LogEmails" as log_emails {
         * id : Uuid <<PK>>
         --
@@ -184,6 +357,20 @@ package "Site" <<Database>> {
         * correoDestinatario : VARCHAR(100)
         * horaEnvio : Datetime
         * status : INT
+    }
+
+    entity "LogNotificaciones" as log_notificaciones {
+        * id : Uuid <<PK>>
+        --
+        * usuarioId : Uuid <<FK>>
+        * proveedorId : Uuid <<FK>>
+        ..
+        * message : VARCHAR(500)
+        * horaEnvio : Datetime
+        * status : INT
+        * tipoNotificacion : INT
+        * titulo : VARCHAR(100)
+        * descripcion : VARCHAR(500)
     }
 }
 
