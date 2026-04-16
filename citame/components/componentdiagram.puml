@@ -1,0 +1,46 @@
+@startuml
+
+package "Canales (Frontend)" {
+  [Cita.me.web]
+  [Cita.me.mobile]
+}
+
+node "Servidores de Aplicación (Backend)" {
+  [Cita.me.web] - [cita.me.api]
+  [Cita.me.mobile] - [cita.me.api]
+  [cita.me.api] - [emailSender]
+}
+
+database "Base de Datos Relacional (cita.me.db)" {
+  [cita.me.api] --> [cita.me.db]
+  
+  frame "Citas" {
+    [citas]
+    [statusCatalogo]
+    [Confirmaciones]
+  }
+  frame "Usuarios" {
+    [usuarios]
+  }
+  frame "Catalogos" {
+    [ciudades]
+    [estados]
+  }
+  frame "Proveedores" {
+    [proveedores]
+    [sucursal]
+    [empleados]
+    [servicios]
+    [categoriaproveedores]
+    [categoriaservicios]
+    [horario]
+    [documentacion]
+    [documentacionObligatoria]
+  }
+}
+
+database "Redis (Caché/Sesiones)" {
+  [cita.me.api] ..> [redis] : use
+}
+
+@enduml
